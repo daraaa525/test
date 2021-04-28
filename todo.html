@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>todo</title>
+    <style>
+        body {
+            background-image: linear-gradient(to right, #24fff5 , yellow);
+        }
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0 auto;
+            text-align: center;
+            width: 300px;
+            height: 500px;
+            background: lightblue;
+            border-radius: 5px;
+        }
+
+        .title {
+            padding: 5px;
+            background: lightpink;
+            font-size: 30px;
+            color: white;
+            font-weight: bold;
+            font-style: italic;
+            border-radius: 5px 5px 0 0;
+        }
+
+        #id-input-todo {
+            margin: 10px 10px 0 10px;
+            border-radius: 5px;
+            font-size: 20px;
+            width: 60%;
+        }
+        #id-button-add {
+            background: bisque;
+            border: 1px solid aliceblue;
+            font-size: 20px;
+            border-radius: 5px;
+
+        }
+        #id-div-container {
+            padding: 10px;
+            border: 1px dashed lightblue;
+        }
+        .todo-cell {
+            padding: 5px;
+            margin: 5px;
+            border: 1px solid #FFFFFF;
+            text-align: left;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .todo-done {
+            position: relative;
+            top: 4px;
+            left: 6px;
+        }
+        .todo-delete {
+            padding: 0px;
+            width: 19px;
+            color: red;
+            font-weight: bold;
+            background: border-box;
+            border: 0;
+        }
+        .done {
+            color: gray;
+            text-decoration: line-through;
+        }
+
+
+
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <div class="title">
+        TO DO LIST
+    </div>
+    <div class="todo-form">
+        <input id="id-input-todo" type="text">
+        <button id="id-button-add" type="button">Add</button>
+    </div>
+    <div id="id-div-container">
+    </div>
+
+</div>
+<script>
+    const log = console.log.bind(console)
+
+    const e = function(selector) {
+        let element = document.querySelector(selector)
+        if (element === null) {
+            let s = `元素没找到, 选择器 ${selector} 错误`
+            alert(s)
+            return null
+        } else {
+            return element
+        }
+    }
+
+    const demoTodo = function() {
+        const templateTodo = function(todo) {
+            let t = `
+            <div class="todo-cell">
+                <input type="checkbox" class="todo-done">
+                <button class="todo-delete">x</button>
+                <span class="text">${todo}</span>
+            </div>
+        `
+            return t
+        }
+
+        const insertTodos = function(todos) {
+            let todoContainer = e('#id-div-container')
+            for (let i = 0; i < todos.length; i++) {
+                let todo = todos[i]
+                let html = templateTodo(todo)
+                todoContainer.insertAdjacentHTML('beforeend', html)
+            }
+        }
+
+        const saveTodo = function(todo) {
+            todos.push(todo)
+            let s = JSON.stringify(todos)
+            localStorage.savedtodos = s
+        }
+
+        const loadTodos = function() {
+            let s = localStorage.savedtodos
+            log('s is', s)
+            if (s === undefined) {
+                return []
+            } else {
+                let ts = JSON.parse(s)
+                return ts
+            }
+        }
+
+        let todos = loadTodos()
+        insertTodos(todos)
+
+        const deleteTodo = function(container, todoCell) {
+            let children = container.children
+            for (let i = 0; i < children.length; i++) {
+                let cell = children[i]
+                if (todoCell === cell) {
+                    todoCell.remove()
+                    let todos = loadTodos()
+                    todos.splice(i, 1)
+                    let s = JSON.stringify(todos)
+                    localStorage.savedtodos = s
+                }
+            }
+        }
+
+        let addButton = e('#id-button-add')
+        addButton.addEventListener('click', function() {
+            let todoInput = e('#id-input-todo')
+            let todo = todoInput.value
+            saveTodo(todo)
+            let todoContainer = e('#id-div-container')
+            let t = templateTodo(todo)
+            todoContainer.insertAdjacentHTML('beforeend', t)
+            todoInput.value = ''
+        })
+
+        let todoContainer = e('#id-div-container')
+
+        todoContainer.addEventListener('click', function(event) {
+            let target = event.target
+            if (target.classList.contains('todo-done')) {
+                let todoDiv = target.parentElement
+                let text = todoDiv.querySelector('.text')
+                text.classList.toggle('done')
+            } else if (target.classList.contains('todo-delete')) {
+                let todoDiv = target.parentElement
+                let container = todoDiv.parentElement
+                deleteTodo(container, todoDiv)
+            }
+        })
+    }
+
+    const __main = function() {
+        demoTodo()
+    }
+
+    __main()
+</script>
+</body>
+</html>
